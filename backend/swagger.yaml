@@ -1,0 +1,22 @@
+swagger: '2.0'
+info:
+  version: '1.0'
+  title: Todo
+  description: App used to keep track of items
+basePath: /v1
+schemes:
+  - http
+consumes:
+  - application/json
+  - application/JSON
+produces:
+  - application/json
+  - application/JSON
+paths:
+  /health:
+    get:
+      responses:
+        '200':
+          description: 'returns the health of a server'
+          schema:
+            type: string
