@@ -1,13 +1,11 @@
 package main
 
 import (
+	"github.com/SAKA-club/todo/backend/gen/restapi"
+	"github.com/SAKA-club/todo/backend/gen/restapi/operations"
+	"github.com/go-openapi/loads"
 	"github.com/go-openapi/runtime"
 	"github.com/rs/zerolog/log"
-
-	"github.com/go-openapi/loads"
-
-	"github.com/saka-club/todo/gen/restapi"
-	"github.com/saka-club/todo/gen/restapi/operations"
 )
 
 func main() {
