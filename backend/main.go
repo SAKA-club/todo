@@ -31,4 +31,8 @@ func main() {
 	server.Port = 8080
 	server.Host = "0.0.0.0"
 
+	if err := server.Serve(); err != nil {
+		log.Panic().Err(err).Msg("server error")
+	}
+
 }
