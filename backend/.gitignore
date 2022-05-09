@@ -16,3 +16,9 @@
 
 # Intellij
 .idea/
+
+# Credentials
+.env
+
+# gen
+/gen
