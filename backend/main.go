@@ -10,12 +10,21 @@ import (
 	"os"
 )
 
-var host = "None"
-
 func main() {
 	// Get configs
 	cfg := LoadConfig()
-	initLog(cfg)
+
+	var err error
+	var host = "None"
+
+	host, err = os.Hostname()
+	if err != nil {
+		log.Panic().Err(err).Msg("unable to get hostname")
+	}
+
+	zerolog.SetGlobalLevel(zerolog.DebugLevel)
+
+	log.Log().Str("Host", host).Msg("Service Startup")
 
 	//swagger
 	swaggerSpec, err := loads.Embedded(restapi.SwaggerJSON, restapi.FlatSwaggerJSON)
@@ -49,17 +58,4 @@ func main() {
 		log.Panic().Err(err).Msg("server error")
 	}
 
-}
-
-func initLog(cfg *Config) {
-	var err error
-
-	host, err = os.Hostname()
-	if err != nil {
-		log.Panic().Err(err).Msg("unable to get hostname")
-	}
-
-	zerolog.SetGlobalLevel(zerolog.DebugLevel)
-
-	log.Log().Str("Host", host).Msg("Service Startup")
 }
