@@ -19,6 +19,12 @@
 
 # Credentials
 .env
+.vac.env
 
 # gen
 /gen
+
+#swagger back
+.vac.env
+swagger.bac.yaml
+fly.toml

@@ -12,6 +12,8 @@ consumes:
 produces:
   - application/json
   - application/JSON
+tags:
+  - name: Item
 paths:
   /health:
     get:
