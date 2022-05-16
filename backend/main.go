@@ -10,6 +10,8 @@ import (
 	"os"
 )
 
+
+
 func main() {
 	// Get configs
 	cfg := LoadConfig()
@@ -59,3 +61,4 @@ func main() {
 	}
 
 }
+
