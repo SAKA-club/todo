@@ -1,9 +1,17 @@
 -- migrate:up
-create table todo_item (
-                       id bigserial not null,
-                       name varchar(255),
-                       email varchar(255) not null
+CREATE TABLE IF NOT EXISTS item (
+                                    id bigserial PRIMARY KEY NOT NULL,
+                                    title text NOT NULL,
+                                    body text,
+                                    priority bool,
+                                    schedule_time timestamptz ,
+                                    complete_time timestamptz,
+                                    update_time timestamptz,
+                                    delete_time timestamptz,
+                                    create_time timestamptz NOT NULL DEFAULT now()
 );
+
 
 -- migrate:down
 
+drop table item;
