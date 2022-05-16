@@ -24,7 +24,5 @@
 # gen
 /gen
 
-#swagger back
-.vac.env
+#swagger back up
 swagger.bac.yaml
-fly.toml
