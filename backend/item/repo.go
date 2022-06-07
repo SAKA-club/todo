@@ -2,9 +2,9 @@ package item
 
 import (
 	"github.com/SAKA-club/todo/backend/gen/models"
-	"github.com/go-openapi/strfmt"
 	"github.com/jmoiron/sqlx"
 	"github.com/rs/zerolog/log"
+	"time"
 )
 
 type repo struct {
@@ -34,7 +34,7 @@ func (r repo) Get(ID int64) (*models.Item, error) {
 	return &item, nil
 }
 
-func (r repo) Create(title string, body string, priority bool, scheduleDate strfmt.Date, completeDate strfmt.Date) (*models.Item, error) {
+func (r repo) Create(title string, body string, priority bool, scheduleDate time.Time, completeDate time.Time) (*models.Item, error) {
 	var item models.Item
 	if err := r.db.Get(&item, "INSERT INTO item (title, body, priority, schedule_time, complete_time) VALUES ($1, $2,$3, $4,$5) RETURNING id, title, priority, schedule_time, complete_time",
 		title, body, priority, scheduleDate, completeDate); err != nil {
@@ -54,7 +54,7 @@ func (r repo) Delete(ID int64) error {
 	return nil
 }
 
-func (r repo) Update(ID int64, title string, body string, priority bool, scheduleTime strfmt.Date, completeTime strfmt.Date) (*models.Item, error) {
+func (r repo) Update(ID int64, title string, body string, priority bool, scheduleTime time.Time, completeTime time.Time) (*models.Item, error) {
 	var item models.Item
 	if err := r.db.Get(&item, "UPDATE item SET title =$1, body= $2, priority = $3, schedule_time =$4, complete_time=$5 WHERE id = $6  RETURNING id, title, body, priority, complete_time",
 		title, body, priority, scheduleTime, completeTime, ID); err != nil {

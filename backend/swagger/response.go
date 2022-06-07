@@ -51,10 +51,16 @@ func (o *Unauthorized) WriteResponse(rw http.ResponseWriter, producer runtime.Pr
 }
 
 type NotFound struct {
+	Title   string `json:"title"`
+	Message string `json:"message"`
+	Code    int    `json:"code"`
 }
 
 func NewNotFound() *NotFound {
-	return &NotFound{}
+	return &NotFound{
+		Title: "Not found",
+		Code:  404,
+	}
 }
 
 func (o *NotFound) WriteResponse(rw http.ResponseWriter, producer runtime.Producer) {

@@ -3,7 +3,8 @@ package item
 import (
 	"context"
 	"github.com/SAKA-club/todo/backend/gen/models"
-	"github.com/go-openapi/strfmt"
+
+	"time"
 )
 
 type service struct {
@@ -25,7 +26,7 @@ func (s service) Get(ctx context.Context, ID int64) (*models.Item, error) {
 
 }
 
-func (s service) Create(ctx context.Context, title string, body string, priority bool, scheduleDate strfmt.Date, completeDate strfmt.Date) (*models.Item, error) {
+func (s service) Create(ctx context.Context, title string, body string, priority bool, scheduleDate time.Time, completeDate time.Time) (*models.Item, error) {
 	return s.r.Create(title, body, priority, scheduleDate, completeDate)
 }
 
@@ -34,7 +35,7 @@ func (s service) Delete(ctx context.Context, ID int64) error {
 
 }
 
-func (s service) Update(ctx context.Context, ID int64, title string, body string, priority bool, scheduleTime strfmt.Date, completeTime strfmt.Date) (*models.Item, error) {
+func (s service) Update(ctx context.Context, ID int64, title string, body string, priority bool, scheduleTime time.Time, completeTime time.Time) (*models.Item, error) {
 	return s.r.Update(ID, title, body, priority, scheduleTime, completeTime)
 
 }

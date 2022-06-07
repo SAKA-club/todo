@@ -194,12 +194,16 @@ definitions:
         type: boolean
       schedule_time:
         type: string
-        format: date
+        format: date-time
         example: "2022-05-05"
+        x-go-custom-tag: db:"schedule_time,omitempty"
+        x-omitempty: true
       complete_time:
         type: string
-        format: date
+        format: date-time
         example: "2022-05-05"
+        x-go-custom-tag: db:"complete_time,omitempty"
+        x-omitempty: true
 
   itemInput:
     type: object
@@ -221,5 +225,6 @@ definitions:
         example: "2022-05-05"
       complete_time:
         type: string
-        format: date
+        format: date-time
         example: "2022-05-05"
+
