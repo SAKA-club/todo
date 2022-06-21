@@ -18,7 +18,7 @@ func NewRepo(db *sqlx.DB) *repo {
 
 func (r repo) GetAll() ([]*models.Item, error) {
 	var items []*models.Item
-	if err := r.db.Select(&items, `SELECT id, title, priority, schedule_time, complete_time FROM item`); err != nil {
+	if err := r.db.Select(&items, `SELECT id, title, priority, schedule_time, complete_time FROM item WHERE delete_time IS NULL`); err != nil {
 		log.Err(err).Msg("could not get items from db")
 		return []*models.Item{}, err
 	}
@@ -27,8 +27,8 @@ func (r repo) GetAll() ([]*models.Item, error) {
 
 func (r repo) Get(ID int64) (*models.Item, error) {
 	var item models.Item
-	if err := r.db.Get(&item, "SELECT  id, title, priority, schedule_time, complete_time FROM item WHERE id= $1", ID); err != nil {
-		log.Err(err).Msg("could not find by id")
+	if err := r.db.Get(&item, "SELECT  id, title, priority, schedule_time, complete_time FROM item WHERE id= $1 AND delete_time IS NULL ", ID); err != nil {
+		log.Err(err).Msg("could not get by id when searching in database")
 		return nil, err
 	}
 	return &item, nil
@@ -36,9 +36,9 @@ func (r repo) Get(ID int64) (*models.Item, error) {
 
 func (r repo) Create(title string, body string, priority bool, scheduleDate time.Time, completeDate time.Time) (*models.Item, error) {
 	var item models.Item
-	if err := r.db.Get(&item, "INSERT INTO item (title, body, priority, schedule_time, complete_time) VALUES ($1, $2,$3, $4,$5) RETURNING id, title, priority, schedule_time, complete_time",
+	if err := r.db.Get(&item, "INSERT INTO item (title, body, priority, schedule_time, complete_time) VALUES ($1, $2, $3, $4, $5) WHERE delete_time IS NULL RETURNING id, title, priority, schedule_time, complete_time",
 		title, body, priority, scheduleDate, completeDate); err != nil {
-		log.Err(err).Msg("could not add to database")
+		log.Err(err).Msg("could not create item to database")
 		return nil, err
 	}
 
@@ -47,7 +47,7 @@ func (r repo) Create(title string, body string, priority bool, scheduleDate time
 }
 
 func (r repo) Delete(ID int64) error {
-	_, err := r.db.Exec("DELETE FROM item WHERE id= $1", ID)
+	_, err := r.db.Exec("DELETE FROM item WHERE id= $1 and delete_time IS NULL", ID)
 	if err != nil {
 		log.Err(err).Msg("was not able to delete item or does not exist")
 	}
@@ -56,9 +56,9 @@ func (r repo) Delete(ID int64) error {
 
 func (r repo) Update(ID int64, title string, body string, priority bool, scheduleTime time.Time, completeTime time.Time) (*models.Item, error) {
 	var item models.Item
-	if err := r.db.Get(&item, "UPDATE item SET title =$1, body= $2, priority = $3, schedule_time =$4, complete_time=$5 WHERE id = $6  RETURNING id, title, body, priority, complete_time",
+	if err := r.db.Get(&item, "UPDATE item SET title =$1, body= $2, priority = $3, schedule_time = $4, complete_time= $5 WHERE id = $6 AND delete_time IS NULL  RETURNING id, title, body, priority, complete_time",
 		title, body, priority, scheduleTime, completeTime, ID); err != nil {
-		log.Err(err).Msg("could not add to database")
+		log.Err(err).Msg("could not update database")
 		return nil, err
 	}
 

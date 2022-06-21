@@ -21,7 +21,6 @@ type ItemService interface {
 func Item(api *operations.TodoAPI, service ItemService) {
 	api.ItemGetAllHandler = item.GetAllHandlerFunc(func(params item.GetAllParams) middleware.Responder {
 		ctx := params.HTTPRequest.Context()
-		//log.Ctx(ctx).With()
 		result, err := service.GetAll(ctx)
 		if err != nil {
 			return item.NewGetNotFound().WithPayload(err)
@@ -33,7 +32,6 @@ func Item(api *operations.TodoAPI, service ItemService) {
 	api.ItemGetHandler = item.GetHandlerFunc(func(params item.GetParams) middleware.Responder {
 		ctx := params.HTTPRequest.Context()
 		result, err := service.Get(ctx, params.ID)
-
 		if err != nil {
 			return item.NewGetNotFound().WithPayload(err.Error())
 		}
@@ -43,7 +41,6 @@ func Item(api *operations.TodoAPI, service ItemService) {
 	api.ItemCreateHandler = item.CreateHandlerFunc(func(params item.CreateParams) middleware.Responder {
 		ctx := params.HTTPRequest.Context()
 		i := params.Body
-
 		result, err := service.Create(ctx, *i.Title, i.Body, i.Priority, time.Time(i.ScheduleTime), time.Time(i.CompleteTime))
 		if err != nil {
 			return item.NewCreateBadRequest().WithPayload(err)
