@@ -195,13 +195,15 @@ definitions:
       schedule_time:
         type: string
         format: date-time
-        example: "2022-05-05"
+        description: RFC3339 Datetime to set
+        example: "2021-06-20T01:02:03+00:00"
         x-go-custom-tag: db:"schedule_time,omitempty"
         x-omitempty: true
       complete_time:
         type: string
         format: date-time
-        example: "2022-05-05"
+        description: RFC3339 Datetime to set
+        example: "2021-06-20T01:02:03+00:00"
         x-go-custom-tag: db:"complete_time,omitempty"
         x-omitempty: true
 
@@ -222,9 +224,15 @@ definitions:
       schedule_time:
         type: string
         format: date
-        example: "2022-05-05"
+        description: RFC3339 Datetime to set
+        example: "2021-06-20T01:02:03+00:00"
+        x-go-custom-tag: db:"complete_time,omitempty"
+        x-omitempty: true
       complete_time:
         type: string
         format: date-time
-        example: "2022-05-05"
+        description: RFC3339 Datetime to set
+        example: "2021-06-20T01:02:03+00:00"
+        x-go-custom-tag: db:"complete_time,omitempty"
+        x-omitempty: true
 
