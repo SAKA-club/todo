@@ -1,7 +1,7 @@
 -- migrate:up
 CREATE TABLE IF NOT EXISTS item (
                                     id BIGSERIAL NOT NULL PRIMARY KEY,
-                                    title text NOT NULL,
+                                    title text NOT NULL ,
                                     body text,
                                     priority bool,
                                     schedule_time timestamptz,

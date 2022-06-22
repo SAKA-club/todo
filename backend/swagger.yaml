@@ -59,7 +59,7 @@ paths:
         '400':
           description: Invalid input
           schema:
-            $ref: '#/responses/badRequest'
+            $ref: '#/definitions/errorResponse'
         '500':
           description: Internal Error
           schema:
@@ -82,11 +82,11 @@ paths:
         '400':
           description: Invalid input
           schema:
-            $ref: '#/responses/badRequest'
+            $ref: '#/definitions/errorResponse'
         '404':
           description: Not Found
           schema:
-            $ref: '#/responses/notFound'
+            $ref: '#/definitions/errorResponse'
         '500':
           description: Internal Error
           schema:
@@ -113,13 +113,13 @@ paths:
         '400':
           description: 'Invalid ID'
           schema:
-            $ref: '#/responses/notFound'
+            $ref: '#/definitions/errorResponse'
         '404':
           description: 'Not Found'
           schema:
-            $ref: '#/responses/notFound'
+            $ref: '#/definitions/errorResponse'
         '500':
-          description: Internal Error
+          description: "Internal Error"
           schema:
             $ref: '#/definitions/errorResponse'
     delete:
@@ -136,29 +136,18 @@ paths:
           required: true
       responses:
         '204':
-          $ref: '#/responses/deleted'
-        '400':
-          $ref: '#/responses/notFound'
+          description: "OK"
+          schema:
+            $ref: '#/definitions/errorResponse'
+        '404':
+          description: "Not Found"
+          schema:
+            $ref: '#/definitions/errorResponse'
         '500':
-          description: Internal Error
+          description: "Internal Error"
           schema:
             $ref: '#/definitions/errorResponse'
 
-
-responses:
-  'deleted':
-    description: Sucessful
-    schema:
-      type: string
-      description: Successfully deleted
-  'badRequest':
-    description: Bad Request
-    schema:
-      $ref: '#/definitions/errorResponse'
-  'notFound':
-    description: Not Found
-    schema:
-      description: Primary resource not found
 
 definitions:
   errorResponse:
@@ -171,11 +160,10 @@ definitions:
       type: 'TodoError'
     properties:
       code:
-        type: string
+        type: integer
       message:
         type: string
-      field:
-        type: string
+
 
   item:
     type: object

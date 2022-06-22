@@ -7,6 +7,7 @@ import (
 	"github.com/SAKA-club/todo/backend/gen/restapi/operations"
 	"github.com/SAKA-club/todo/backend/gen/restapi/operations/item"
 	"github.com/go-openapi/runtime/middleware"
+	"github.com/rs/zerolog/log"
 	"time"
 )
 
@@ -23,7 +24,9 @@ func Item(api *operations.TodoAPI, service ItemService) {
 		ctx := params.HTTPRequest.Context()
 		result, err := service.GetAll(ctx)
 		if err != nil {
-			return item.NewGetNotFound().WithPayload(err)
+			log.Err(err).Msg("Get all items handler")
+
+			return item.NewGetAllInternalServerError().WithPayload(&errs.ErrInternal)
 		}
 		return item.NewGetAllOK().WithPayload(result)
 
@@ -33,7 +36,13 @@ func Item(api *operations.TodoAPI, service ItemService) {
 		ctx := params.HTTPRequest.Context()
 		result, err := service.Get(ctx, params.ID)
 		if err != nil {
-			return item.NewGetNotFound().WithPayload(err.Error())
+			if errs.IsNotFound(err) {
+				return item.NewGetNotFound().WithPayload(&errs.ErrNotFound)
+			} else if errs.IsNotNoRows(err) {
+				return item.NewGetBadRequest().WithPayload(&errs.ErrInvalidRequest)
+			}
+			log.Err(err).Msg("Get item handler")
+			return item.NewGetInternalServerError().WithPayload(&errs.ErrInternal)
 		}
 		return item.NewGetOK().WithPayload(result)
 	})
@@ -43,7 +52,12 @@ func Item(api *operations.TodoAPI, service ItemService) {
 		i := params.Body
 		result, err := service.Create(ctx, *i.Title, i.Body, i.Priority, time.Time(i.ScheduleTime), time.Time(i.CompleteTime))
 		if err != nil {
-			return item.NewCreateBadRequest().WithPayload(err)
+			if errs.IsNotNoRows(err) {
+				return item.NewCreateBadRequest().WithPayload(&errs.ErrInvalidRequest)
+			}
+			log.Err(err).Msg("put create items handler")
+			return item.NewCreateInternalServerError().WithPayload(&errs.ErrInternal)
+
 		}
 
 		return item.NewCreateCreated().WithPayload(result)
@@ -55,32 +69,33 @@ func Item(api *operations.TodoAPI, service ItemService) {
 		err := service.Delete(ctx, params.ID)
 		if err != nil {
 			if errs.IsNotFound(err) {
-				return item.NewUpdateNotFound().WithPayload(err)
+				return item.NewDeleteNotFound().WithPayload(&errs.ErrNotFound)
 			}
-			return item.NewDeleteBadRequest().WithPayload(err)
+			log.Error().Err(err).Msg("Item Delete Handler")
+			return item.NewDeleteInternalServerError().WithPayload(&errs.ErrInternal)
 		}
 
-		return item.NewUpdateNotFound().WithPayload(err)
+		return item.NewDeleteNoContent()
 
 	})
 
 	api.ItemUpdateHandler = item.UpdateHandlerFunc(func(params item.UpdateParams) middleware.Responder {
 		ctx := params.HTTPRequest.Context()
 		i := params.Body
+		if i == nil || i.Title == nil || *i.Title == "" {
+			return item.NewUpdateBadRequest().WithPayload(&errs.ErrInvalidRequest)
+		}
 
 		result, err := service.Update(ctx, i.ID, *i.Title, i.Body, i.Priority, time.Time(i.ScheduleTime), time.Time(i.CompleteTime))
 
 		if err != nil {
 			if errs.IsNotFound(err) {
-				return item.NewUpdateNotFound().WithPayload(err)
+				return item.NewUpdateNotFound().WithPayload(&errs.ErrNotFound)
 			}
-			if errs.IsNotNoRows(err) {
-				return item.NewCreateBadRequest().WithPayload(err)
-			}
+			log.Err(err).Msg("put update item handler")
+			return item.NewUpdateInternalServerError().WithPayload(&errs.ErrInternal)
 		}
 
 		return item.NewUpdateOK().WithPayload(result)
-
 	})
-
 }
