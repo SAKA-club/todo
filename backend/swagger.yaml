@@ -110,10 +110,6 @@ paths:
           description: 'Found todo item by ID'
           schema:
             $ref: '#/definitions/item'
-        '400':
-          description: 'Invalid ID'
-          schema:
-            $ref: '#/definitions/errorResponse'
         '404':
           description: 'Not Found'
           schema:

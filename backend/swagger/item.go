@@ -38,8 +38,6 @@ func Item(api *operations.TodoAPI, service ItemService) {
 		if err != nil {
 			if errs.IsNotFound(err) {
 				return item.NewGetNotFound().WithPayload(&errs.ErrNotFound)
-			} else if errs.IsNotNoRows(err) {
-				return item.NewGetBadRequest().WithPayload(&errs.ErrInvalidRequest)
 			}
 			log.Err(err).Msg("Get item handler")
 			return item.NewGetInternalServerError().WithPayload(&errs.ErrInternal)
@@ -50,11 +48,11 @@ func Item(api *operations.TodoAPI, service ItemService) {
 	api.ItemCreateHandler = item.CreateHandlerFunc(func(params item.CreateParams) middleware.Responder {
 		ctx := params.HTTPRequest.Context()
 		i := params.Body
+		if i == nil || i.Title == nil || *i.Title == "" {
+			return item.NewCreateBadRequest().WithPayload(&errs.ErrInvalidRequest)
+		}
 		result, err := service.Create(ctx, *i.Title, i.Body, i.Priority, time.Time(i.ScheduleTime), time.Time(i.CompleteTime))
 		if err != nil {
-			if errs.IsNotNoRows(err) {
-				return item.NewCreateBadRequest().WithPayload(&errs.ErrInvalidRequest)
-			}
 			log.Err(err).Msg("put create items handler")
 			return item.NewCreateInternalServerError().WithPayload(&errs.ErrInternal)
 
