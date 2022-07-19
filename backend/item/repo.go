@@ -39,9 +39,9 @@ func (r repo) Get(ID int64) (*models.Item, error) {
 	return &item, nil
 }
 
-func (r repo) Create(title string, body string, priority bool, scheduleDate time.Time, completeDate time.Time) (*models.Item, error) {
+func (r repo) Create(title string, body string, priority bool, scheduleDate *time.Time, completeDate *time.Time) (*models.Item, error) {
 	var item models.Item
-	if err := r.db.Get(&item, "INSERT INTO item (title, body, priority, schedule_time, complete_time) VALUES ($1, $2, $3, $4, $5) WHERE delete_time IS NULL RETURNING id, title, priority, schedule_time, complete_time",
+	if err := r.db.Get(&item, "INSERT INTO item (title, body, priority, schedule_time, complete_time) VALUES ($1, $2, $3, $4, $5) RETURNING id, title, priority, schedule_time, complete_time",
 		title, body, priority, scheduleDate, completeDate); err != nil {
 		if err == sql.ErrNoRows {
 			return nil, errs.InputError
@@ -66,7 +66,7 @@ func (r repo) Delete(ID int64) error {
 	return nil
 }
 
-func (r repo) Update(ID int64, title string, body string, priority bool, scheduleTime time.Time, completeTime time.Time) (*models.Item, error) {
+func (r repo) Update(ID int64, title string, body string, priority bool, scheduleTime *time.Time, completeTime *time.Time) (*models.Item, error) {
 	var item models.Item
 	query := "UPDATE item SET title = $1, body= $2, priority = $3, schedule_time = $4, complete_time= $5 WHERE id = $6 AND delete_time IS NULL RETURNING id, title, body, priority, complete_time"
 	if err := r.db.Get(&item, query, title, body, priority, scheduleTime, completeTime, ID); err != nil {

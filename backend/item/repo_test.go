@@ -7,6 +7,7 @@ import (
 	"github.com/SAKA-club/todo/backend/errs"
 	"github.com/jmoiron/sqlx"
 	"testing"
+	"time"
 )
 
 func TestGetAll(t *testing.T) {
@@ -123,11 +124,13 @@ func TestCreate(t *testing.T) {
 	r := NewRepo(sqlx.NewDb(mockDB, "sqlmock"))
 
 	//checking for error
-	mock.ExpectQuery("SELECT id, title, priority, schedule_time, complete_time FROM item WHERE id= (.+) AND delete_time IS NULL").
+	mock.ExpectQuery("INSERT INTO item (.+)" +
+		" VALUES (.+) WHERE delete_time IS NULL RETURNING id, title, priority, schedule_time, complete_time").
 		WillReturnError(sql.ErrNoRows)
 
-	item, err := r.Get(1)
-	if item != nil || err != errs.NotFoundErr {
+	item, err := r.Create("Test 1", "Hello this is a test", true, time.Now(), time.Now())
+
+	if item != nil || err != errs.InputError {
 		t.Errorf("Expected: %v, Got: %v", "errs.InternalErr", err)
 	}
 }
