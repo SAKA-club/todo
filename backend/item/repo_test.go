@@ -109,12 +109,6 @@ func TestGet(t *testing.T) {
 }
 
 func TestCreate(t *testing.T) {
-	//	var item models.Item
-	//	if err := r.db.Get(&item, "INSERT INTO item (title, body, priority, schedule_time, complete_time) VALUES ($1, $2, $3, $4, $5) WHERE delete_time IS NULL RETURNING id, title, priority, schedule_time, complete_time",
-	//		title, body, priority, scheduleDate, completeDate); err != nil {
-	//		if err == sql.ErrNoRows {
-	//			return nil, errs.InputError
-
 	mockDB, mock, err := sqlmock.New()
 	if err != nil {
 		t.Fatalf("mock db setup %v", err)
@@ -125,12 +119,73 @@ func TestCreate(t *testing.T) {
 
 	//checking for error
 	mock.ExpectQuery("INSERT INTO item (.+)" +
-		" VALUES (.+) WHERE delete_time IS NULL RETURNING id, title, priority, schedule_time, complete_time").
+		" VALUES (.+) RETURNING id, title, body, priority, schedule_time, complete_time").
 		WillReturnError(sql.ErrNoRows)
 
-	item, err := r.Create("Test 1", "Hello this is a test", true, time.Now(), time.Now())
+	t1 := time.Now()
+	item, err := r.Create("Test 1", "Hello this is a test", true, &t1, &t1)
 
 	if item != nil || err != errs.InputError {
-		t.Errorf("Expected: %v, Got: %v", "errs.InternalErr", err)
+		t.Errorf("Expected: %v, Got: %v", "errs.InputError", err)
+	}
+
+	//checking for everything filled out
+	rows := sqlmock.NewRows([]string{"id", "title", "body", "priority", "schedule_time", "complete_time"}).
+		AddRow(1, "Test 2", "hello this is a test", true, "2006-01-02 15:04:05", "2006-01-02 15:04:05")
+
+	mock.ExpectQuery("INSERT INTO item (.+)" +
+		" VALUES (.+) RETURNING id, title, body, priority, schedule_time, complete_time").
+		WillReturnRows(rows)
+
+	item, err = r.Create("Test 2", "Hello this is a test", true, &t1, &t1)
+	if item == nil || err != nil {
+		t.Errorf("expected item to return item {id 1, test 2, hello this is a test, true, %v, %v} Got: %v", t1, t1, item)
+	}
+
+	//checking for everything null except for title
+	rows = sqlmock.NewRows([]string{"id", "title", "body", "priority", "schedule_time", "complete_time"}).
+		AddRow(2, "Test 3", " ", false, nil, nil)
+	mock.ExpectQuery("INSERT INTO item (.+)" +
+		" VALUES (.+) RETURNING id, title, body, priority, schedule_time, complete_time").
+		WillReturnRows(rows)
+	item, err = r.Create("Test 3", "", false, nil, nil)
+	if item == nil || err != nil {
+		t.Errorf("expected item to return item {id 2, test 3, false, nil, nil} Got: %v", item)
+	}
+
+	//checking for body to be empty/nil
+	rows = sqlmock.NewRows([]string{"id", "title", "body", "priority", "schedule_time", "complete_time"}).
+		AddRow(3, "Test 4", " ", true, "2006-01-02 15:04:05", "2006-01-02 15:04:05")
+
+	mock.ExpectQuery("INSERT INTO item (.+)" +
+		" VALUES (.+) RETURNING id, title, body, priority, schedule_time, complete_time").
+		WillReturnRows(rows)
+	item, err = r.Create("Test 4", "", true, &t1, &t1)
+	if item == nil || err != nil {
+		t.Errorf("expected item to return item {id 2, test 3,  ' ', true, %v, %v} Got: %v", t1, t1, item)
+	}
+
+	//checking for schedule time to be empty/nil
+	rows = sqlmock.NewRows([]string{"id", "title", "body", "priority", "schedule_time", "complete_time"}).
+		AddRow(4, "Test 5", " this is test number 5 ", true, nil, "2006-01-02 15:04:05")
+
+	mock.ExpectQuery("INSERT INTO item (.+)" +
+		" VALUES (.+) RETURNING id, title, body, priority, schedule_time, complete_time").
+		WillReturnRows(rows)
+	item, err = r.Create("Test 5", "this is test number 5", true, nil, &t1)
+	if item == nil || err != nil {
+		t.Errorf("expected item to return item {id 2, test 3,  ' ', true, nil, %v} Got: %v", t1, item)
+	}
+
+	//checking for complete time to be empty/nil
+	rows = sqlmock.NewRows([]string{"id", "title", "body", "priority", "schedule_time", "complete_time"}).
+		AddRow(5, "Test 6", " this is test number 6 ", true, "2006-01-02 15:04:05", nil)
+
+	mock.ExpectQuery("INSERT INTO item (.+)" +
+		" VALUES (.+) RETURNING id, title, body, priority, schedule_time, complete_time").
+		WillReturnRows(rows)
+	item, err = r.Create("Test 5", "this is test number 6", true, &t1, nil)
+	if item == nil || err != nil {
+		t.Errorf("expected item to return item {id 2, test 3,  ' ', true, %v, nil} Got: %v", t1, item)
 	}
 }

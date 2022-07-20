@@ -41,7 +41,7 @@ func (r repo) Get(ID int64) (*models.Item, error) {
 
 func (r repo) Create(title string, body string, priority bool, scheduleDate *time.Time, completeDate *time.Time) (*models.Item, error) {
 	var item models.Item
-	if err := r.db.Get(&item, "INSERT INTO item (title, body, priority, schedule_time, complete_time) VALUES ($1, $2, $3, $4, $5) RETURNING id, title, priority, schedule_time, complete_time",
+	if err := r.db.Get(&item, "INSERT INTO item (title, body, priority, schedule_time, complete_time) VALUES ($1, $2, $3, $4, $5) RETURNING id, title, body, priority, schedule_time, complete_time",
 		title, body, priority, scheduleDate, completeDate); err != nil {
 		if err == sql.ErrNoRows {
 			return nil, errs.InputError
