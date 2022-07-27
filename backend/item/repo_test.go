@@ -74,17 +74,18 @@ func TestGet(t *testing.T) {
 	if item != nil || err != errs.NotFoundErr {
 		t.Errorf("Expected: %v, Got: %v", "errs.InternalErr", err)
 	}
-	// check if item is not there and you try to retrieve it?
-	rows := sqlmock.NewRows([]string{"id", "title", "priority", "schedule_time", "complete_time"})
-	mock.ExpectQuery("SELECT id, title, priority, schedule_time, complete_time FROM item WHERE id= (.+) AND delete_time IS NULL").WillReturnRows(rows)
-	item, err = r.Get(1)
-	if item != nil || err != nil {
-		t.Errorf("Expected item to be nil, Got %v", item)
-	}
+
+	//// check if item is not there and you try to retrieve it?
+	////rows := sqlmock.NewRows([]string{"id", "title", "priority", "schedule_time", "complete_time"})
+	//mock.ExpectQuery("SELECT id, title, priority, schedule_time, complete_time FROM item WHERE (.+) AND delete_time IS NULL")
+	//item, err = r.Get(1)
+	//if item != nil || err != nil {
+	//	t.Errorf("Expected item to be nil, Got %v", item)
+	//}
 
 	// check if you can get item based on id
 
-	rows = sqlmock.NewRows([]string{"id", "title", "priority", "schedule_time", "complete_time"}).
+	rows := sqlmock.NewRows([]string{"id", "title", "priority", "schedule_time", "complete_time"}).
 		AddRow(1, "Test 1", true, "2006-01-02 15:04:05", "2006-01-02 15:04:05")
 
 	mock.ExpectQuery("SELECT id, title, priority, schedule_time, complete_time FROM item WHERE id= (.+) AND delete_time IS NULL").WillReturnRows(rows)
@@ -102,8 +103,8 @@ func TestGet(t *testing.T) {
 	mock.ExpectQuery("SELECT id, title, priority, schedule_time, complete_time FROM item WHERE id= (.+) AND delete_time IS NOT NULL").WillReturnRows(rows)
 
 	item, err = r.Get(1)
-	if item == nil || err != nil {
-		t.Errorf("Expected item to return item{1, Test 1, true, 2006-01-02 15:04:05, 2006-01-02 15:04:05} got %v", item)
+	if item != nil || err == nil {
+		t.Errorf("Expected item to return <nil> got %v", item)
 	}
 
 }
@@ -187,5 +188,86 @@ func TestCreate(t *testing.T) {
 	item, err = r.Create("Test 5", "this is test number 6", true, &t1, nil)
 	if item == nil || err != nil {
 		t.Errorf("expected item to return item {id 2, test 3,  ' ', true, %v, nil} Got: %v", t1, item)
+	}
+}
+
+func TestUpdate(t *testing.T) {
+	//	var item models.Item
+	//	query := "UPDATE item SET title = $1, body= $2, priority = $3, schedule_time = $4, complete_time= $5 WHERE id = $6 AND delete_time IS NULL RETURNING id, title, body, priority, complete_time"
+	//	if err := r.db.Get(&item, query, title, body, priority, scheduleTime, completeTime, ID); err != nil {
+	//		if err == sql.ErrNoRows {
+	//			return nil, errs.NotFoundErr
+	//		}
+	//
+	//		log.Err(err).Msg("could not update database")
+	//		return nil, errs.DBErr
+	mockDB, mock, err := sqlmock.New()
+	if err != nil {
+		t.Fatalf("mock db setup %v", err)
+	}
+	defer mockDB.Close()
+
+	r := NewRepo(sqlx.NewDb(mockDB, "sqlmock"))
+
+	//check for errors
+	mock.ExpectQuery("UPDATE item SET title = (.+), body= (.+), priority = (.+), schedule_time = (.+), complete_time= (.+) WHERE id = (.+) AND " +
+		"delete_time IS NULL RETURNING id, title, body, priority, complete_time").
+		WillReturnError(sql.ErrNoRows)
+
+	t1 := time.Now()
+	item, err := r.Update(1, "Test 3", "Hello this is a test", true, &t1, &t1)
+
+	if item != nil || err != errs.NotFoundErr {
+		t.Errorf("Expected %v Got: %v", "errs.NotFoundErr", err)
+	}
+
+	//// check for title update
+	//
+	//rows := sqlmock.NewRows([]string{"id", "title", "body", "priority", "schedule_time", "complete_time"}).
+	//	AddRow(1, "Test 1", " ", true, "2006-01-02 15:04:05", "2006-01-02 15:04:05")
+	//
+	//mock.ExpectQuery("UPDATE item SET title = (.+), body= (.+), priority = (.+), schedule_time = (.+), complete_time= (.+) WHERE id = (.+) AND " +
+	//	"delete_time IS NULL RETURNING id, title, body, priority, complete_time").WillReturnRows(rows)
+	//
+	//item, err = r.Update(1, "New test", " ", true, &t1, &t1)
+	//if *item.Title != "New test" || err != nil {
+	//	t.Errorf("Expected 'New test' Got: %v", *item.Title)
+	//}
+
+	////check for body update
+	//item, err = r.Update(1, "New test", "body has changed", true, &t1, &t1)
+	//if item.Body != "body has changed" || err != nil {
+	//	t.Errorf("Expected 'body has changed' Got: %v", item.Body)
+	//}
+	//// check for time scheduled time update
+	//var t2 *strfmt.DateTime
+	//item, err = r.Update(1, "New test", "body has changed", true, nil, &t1)
+	//if item.ScheduleTime != *t2 || err != nil {
+	//	t.Errorf("Expected 'nil' Got: %v", item.ScheduleTime)
+	//}
+	//
+	//// check for complete_time update
+	//item, err = r.Update(1, "New test", "body has changed", true, nil, nil)
+	//if item.CompleteTime != *t2 || err != nil {
+	//	t.Errorf("Expected 'nil' Got: %v", item.CompleteTime)
+	//}
+
+}
+
+func TestDelete(t *testing.T) {
+	//_, err := r.db.Exec("DELETE FROM item WHERE id= $1 and delete_time IS NULL", ID)
+	mockDB, mock, err := sqlmock.New()
+	if err != nil {
+		t.Fatalf("mock db setup %v", err)
+	}
+	defer mockDB.Close()
+
+	r := NewRepo(sqlx.NewDb(mockDB, "sqlmock"))
+	mock.ExpectExec("DELETE FROM item WHERE (.+) and delete_time IS NULL").WillReturnError(sql.ErrNoRows)
+
+	err = r.Delete(1)
+
+	if !errs.IsNotFound(err) {
+		t.Errorf("Expected %v Got: %v", "errs.NotFoundErr", err)
 	}
 }
