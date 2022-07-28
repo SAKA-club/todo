@@ -14,9 +14,9 @@ import (
 type ItemService interface {
 	GetAll(ctx context.Context) ([]*models.Item, error)
 	Get(ctx context.Context, ID int64) (*models.Item, error)
-	Create(ctx context.Context, title string, body string, priority bool, scheduleTime time.Time, completeTime time.Time) (*models.Item, error)
+	Create(ctx context.Context, title string, body string, priority bool, scheduleTime *time.Time, completeTime *time.Time) (*models.Item, error)
 	Delete(ctx context.Context, ID int64) error
-	Update(ctx context.Context, ID int64, title string, body string, priority bool, scheduleTime time.Time, completeTime time.Time) (*models.Item, error)
+	Update(ctx context.Context, ID int64, title string, body string, priority bool, scheduleTime *time.Time, completeTime *time.Time) (*models.Item, error)
 }
 
 func Item(api *operations.TodoAPI, service ItemService) {
@@ -48,10 +48,22 @@ func Item(api *operations.TodoAPI, service ItemService) {
 	api.ItemCreateHandler = item.CreateHandlerFunc(func(params item.CreateParams) middleware.Responder {
 		ctx := params.HTTPRequest.Context()
 		i := params.Body
+		var scheduleTime, completeTime *time.Time
+
+		if i.ScheduleTime != nil {
+			t := time.Time(*i.ScheduleTime)
+			scheduleTime = &t
+		}
+
+		if i.CompleteTime != nil {
+			t := time.Time(*i.CompleteTime)
+			completeTime = &t
+		}
+
 		if i == nil || i.Title == nil || *i.Title == "" {
 			return item.NewCreateBadRequest().WithPayload(&errs.ErrInvalidRequest)
 		}
-		result, err := service.Create(ctx, *i.Title, i.Body, i.Priority, time.Time(i.ScheduleTime), time.Time(i.CompleteTime))
+		result, err := service.Create(ctx, *i.Title, i.Body, i.Priority, scheduleTime, completeTime)
 		if err != nil {
 			log.Err(err).Msg("put create items handler")
 			return item.NewCreateInternalServerError().WithPayload(&errs.ErrInternal)
@@ -84,7 +96,17 @@ func Item(api *operations.TodoAPI, service ItemService) {
 			return item.NewUpdateBadRequest().WithPayload(&errs.ErrInvalidRequest)
 		}
 
-		result, err := service.Update(ctx, i.ID, *i.Title, i.Body, i.Priority, time.Time(i.ScheduleTime), time.Time(i.CompleteTime))
+		var scheduleTime, completeTime *time.Time
+		if scheduleTime != nil {
+			t := time.Time(*i.ScheduleTime)
+			scheduleTime = &t
+		}
+		if completeTime != nil {
+			t := time.Time(*i.CompleteTime)
+			completeTime = &t
+		}
+
+		result, err := service.Update(ctx, i.ID, *i.Title, i.Body, i.Priority, scheduleTime, completeTime)
 
 		if err != nil {
 			if errs.IsNotFound(err) {

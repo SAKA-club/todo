@@ -1,4 +1,4 @@
-#Deployment
+# Deployment
 We are using [fly.io](https://fly.io/docs/speedrun/) for deployment
 
 In order to deploy to fly.io flyctl needs to be installed
@@ -8,6 +8,16 @@ Mac:
 
 Windows:
 `iwr https://fly.io/install.ps1 -useb | iex`
+
+## Testing
+- To run all tests
+    ```shell
+    go test ./... 
+    ```
+- To run tests in an individual directory
+    ```shell
+    go test ./<directory>
+    ```
 
 ## flyctl commands
 

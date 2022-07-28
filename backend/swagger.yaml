@@ -212,6 +212,7 @@ definitions:
         example: "2021-06-20T01:02:03+00:00"
         x-go-custom-tag: db:"complete_time,omitempty"
         x-omitempty: true
+        x-isnullable: true
       complete_time:
         type: string
         format: date-time
@@ -219,4 +220,5 @@ definitions:
         example: "2021-06-20T01:02:03+00:00"
         x-go-custom-tag: db:"complete_time,omitempty"
         x-omitempty: true
+        x-isnullable: true
 
