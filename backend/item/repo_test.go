@@ -75,14 +75,6 @@ func TestGet(t *testing.T) {
 		t.Errorf("Expected: %v, Got: %v", "errs.InternalErr", err)
 	}
 
-	//// check if item is not there and you try to retrieve it?
-	////rows := sqlmock.NewRows([]string{"id", "title", "priority", "schedule_time", "complete_time"})
-	//mock.ExpectQuery("SELECT id, title, priority, schedule_time, complete_time FROM item WHERE (.+) AND delete_time IS NULL")
-	//item, err = r.Get(1)
-	//if item != nil || err != nil {
-	//	t.Errorf("Expected item to be nil, Got %v", item)
-	//}
-
 	// check if you can get item based on id
 
 	rows := sqlmock.NewRows([]string{"id", "title", "priority", "schedule_time", "complete_time"}).
@@ -192,15 +184,6 @@ func TestCreate(t *testing.T) {
 }
 
 func TestUpdate(t *testing.T) {
-	//	var item models.Item
-	//	query := "UPDATE item SET title = $1, body= $2, priority = $3, schedule_time = $4, complete_time= $5 WHERE id = $6 AND delete_time IS NULL RETURNING id, title, body, priority, complete_time"
-	//	if err := r.db.Get(&item, query, title, body, priority, scheduleTime, completeTime, ID); err != nil {
-	//		if err == sql.ErrNoRows {
-	//			return nil, errs.NotFoundErr
-	//		}
-	//
-	//		log.Err(err).Msg("could not update database")
-	//		return nil, errs.DBErr
 	mockDB, mock, err := sqlmock.New()
 	if err != nil {
 		t.Fatalf("mock db setup %v", err)
@@ -255,7 +238,6 @@ func TestUpdate(t *testing.T) {
 }
 
 func TestDelete(t *testing.T) {
-	//_, err := r.db.Exec("DELETE FROM item WHERE id= $1 and delete_time IS NULL", ID)
 	mockDB, mock, err := sqlmock.New()
 	if err != nil {
 		t.Fatalf("mock db setup %v", err)
